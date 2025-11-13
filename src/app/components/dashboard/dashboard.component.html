@@ -1,1 +1,59 @@
-<p>dashboard works!</p>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
+  
+    <!-- Total Tasks Card -->
+  <div class="rounded-xl shadow-lg p-6 text-white bg-blue-600">
+    <div class="flex items-center justify-between">
+      <div>
+        <p class="text-sm opacity-90 mb-1">Total Tasks</p>
+        <h3 class="text-3xl font-bold">{{ statistics.total }}</h3>
+      </div>
+      <div class="text-4xl opacity-80">📋</div>
+    </div>
+  </div>
+
+  <!-- Completed Tasks Card -->
+  <div class="rounded-xl shadow-lg p-6 text-white bg-green-600">
+    <div class="flex items-center justify-between">
+      <div>
+        <p class="text-sm opacity-90 mb-1">Completed</p>
+        <h3 class="text-3xl font-bold">{{ statistics.completed }}</h3>
+      </div>
+      <div class="text-4xl opacity-80">✅</div>
+    </div>
+    <div class="mt-2 text-xs opacity-90">{{ completionRate }}% completion rate</div>
+  </div>
+
+  <!-- Pending Tasks Card -->
+  <div class="rounded-xl shadow-lg p-6 text-white bg-yellow-500">
+    <div class="flex items-center justify-between">
+      <div>
+        <p class="text-sm opacity-90 mb-1">Pending</p>
+        <h3 class="text-3xl font-bold">{{ statistics.pending }}</h3>
+      </div>
+      <div class="text-4xl opacity-80">⏳</div>
+    </div>
+  </div>
+
+  <!-- High Priority Card -->
+  <div class="rounded-xl shadow-lg p-6 text-white bg-red-600">
+    <div class="flex items-center justify-between">
+      <div>
+        <p class="text-sm opacity-90 mb-1">High Priority</p>
+        <h3 class="text-3xl font-bold">{{ statistics.highPriority }}</h3>
+      </div>
+      <div class="text-4xl opacity-80">🔥</div>
+    </div>
+  </div>
+
+  <!-- Overdue Card -->
+  <div class="rounded-xl shadow-lg p-6 text-white bg-purple-600">
+    <div class="flex items-center justify-between">
+      <div>
+        <p class="text-sm opacity-90 mb-1">Overdue</p>
+        <h3 class="text-3xl font-bold">{{ statistics.overdue }}</h3>
+      </div>
+      <div class="text-4xl opacity-80">⚠️</div>
+    </div>
+  </div>
+  
+</div>
