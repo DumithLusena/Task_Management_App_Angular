@@ -1,1 +1,183 @@
-<p>task-list works!</p>
+<div class="min-h-screen bg-linear from-blue-50 to-purple-50 dark:from-gray-900 dark:to-gray-800 p-4 md:p-8 transition-colors duration-200">
+  <div class="max-w-7xl mx-auto">
+    
+    <!-- Header -->
+    <div class="mb-8 text-center">
+      <h1 class="text-4xl md:text-5xl font-bold text-gray-800 dark:text-white mb-2">📝 Task Manager Pro</h1>
+      <p class="text-gray-600 dark:text-gray-300">Organize your tasks efficiently and boost productivity</p>
+    </div>
+
+    <app-dashboard></app-dashboard>
+
+    <!-- Add Task Button -->
+    <div class="mb-6">
+        <button (click)="toggleForm()" 
+        class="w-full md:w-auto bg-linear-to-r from-green-500 to-teal-500 hover:from-green-600 hover:to-teal-600 text-white font-bold px-8 py-4 rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 flex items-center justify-center gap-2">
+        <span class="text-2xl">{{ showForm ? '−' : '+' }}</span>
+        <span>{{ showForm ? 'Close Form' : 'Add New Task' }}</span>
+        </button>
+    </div>
+
+    <!-- Task Form -->
+    <div *ngIf="showForm || editingTask" class="mb-6 animate-fade-in">
+      <app-task-form *ngIf="editingTask" [task]="editingTask" (save)="saveTask($event)" (cancel)="cancelEdit()"></app-task-form>
+      <app-task-form *ngIf="!editingTask && showForm" (save)="saveTask($event)" (cancel)="cancelEdit()"></app-task-form>
+    </div>
+
+    <!-- Filters and Search -->
+    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 mb-6 transition-colors duration-200">
+      <h3 class="text-lg font-bold text-gray-800 dark:text-white mb-4">🔍 Filter & Search</h3>
+      
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+        <!-- Search -->
+        <div class="lg:col-span-2">
+          <input type="text" [(ngModel)]="filter.searchTerm" (ngModelChange)="applyFilters()"
+            class="w-full p-3 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+            placeholder="🔎 Search tasks...">
+        </div>
+
+        <!-- Category Filter -->
+        <div>
+          <select [(ngModel)]="filter.category" (ngModelChange)="applyFilters()"
+            class="w-full p-3 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all">
+            <option value="">All Categories</option>
+            <option *ngFor="let cat of categories" [value]="cat.name">{{ cat.icon }} {{ cat.name }}</option>
+          </select>
+        </div>
+
+        <!-- Priority Filter -->
+        <div>
+          <select [(ngModel)]="filter.priority" (ngModelChange)="applyFilters()"
+            class="w-full p-3 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all">
+            <option value="">All Priorities</option>
+            <option value="high">🔴 High</option>
+            <option value="medium">🟡 Medium</option>
+            <option value="low">🟢 Low</option>
+          </select>
+        </div>
+
+        <!-- Status Filter -->
+        <div>
+          <select [(ngModel)]="filter.status" (ngModelChange)="applyFilters()"
+            class="w-full p-3 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all">
+            <option value="all">All Tasks</option>
+            <option value="pending">⏳ Pending</option>
+            <option value="completed">✅ Completed</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Sort Options -->
+      <div class="mt-4 flex items-center gap-4">
+        <span class="text-gray-700 dark:text-gray-300 font-semibold">Sort by:</span>
+        <div class="flex gap-2">
+          <button (click)="sortBy = 'date'; applyFilters()"
+            [class.bg-blue-600]="sortBy === 'date'" [class.text-white]="sortBy === 'date'"
+            [class.bg-gray-200]="sortBy !== 'date'" [class.text-gray-700]="sortBy !== 'date'"
+            [class.dark:bg-gray-700]="sortBy !== 'date'" [class.dark:text-gray-300]="sortBy !== 'date'"
+            class="px-4 py-2 rounded-lg transition-colors font-medium">
+            📅 Date
+          </button>
+          <button (click)="sortBy = 'title'; applyFilters()"
+            [class.bg-blue-600]="sortBy === 'title'" [class.text-white]="sortBy === 'title'"
+            [class.bg-gray-200]="sortBy !== 'title'" [class.text-gray-700]="sortBy !== 'title'"
+            [class.dark:bg-gray-700]="sortBy !== 'title'" [class.dark:text-gray-300]="sortBy !== 'title'"
+            class="px-4 py-2 rounded-lg transition-colors font-medium">
+            🔤 Title
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Task List -->
+    <div class="space-y-4">
+      <div *ngIf="filteredTasks.length === 0" class="text-center py-16 bg-white dark:bg-gray-800 rounded-2xl shadow-lg transition-colors duration-200">
+        <div class="text-6xl mb-4">📭</div>
+        <h3 class="text-2xl font-bold text-gray-700 dark:text-gray-200 mb-2">No tasks found</h3>
+        <p class="text-gray-500 dark:text-gray-400">{{ tasks.length === 0 ? 'Create your first task to get started!' : 'Try adjusting your filters' }}</p>
+      </div>
+
+      <div *ngFor="let task of filteredTasks" 
+        class="bg-white dark:bg-gray-800 rounded-xl shadow-md hover:shadow-xl transition-all duration-200 p-6 border-l-4"
+        [class.border-red-500]="task.priority === 'high'"
+        [class.border-yellow-500]="task.priority === 'medium'"
+        [class.border-green-500]="task.priority === 'low'"
+        [class.opacity-60]="task.completed">
+        
+        <div class="flex items-start gap-4">
+          <!-- Checkbox -->
+          <div class="shrink-0 mt-1">
+            <input type="checkbox" [checked]="task.completed" (change)="toggleComplete(task)"
+              class="w-6 h-6 text-blue-600 border-gray-300 rounded focus:ring-2 focus:ring-blue-500 cursor-pointer">
+          </div>
+
+          <!-- Task Content -->
+          <div class="flex-1 min-w-0">
+            <!-- Title and Priority -->
+            <div class="flex items-center gap-3 mb-2">
+              <h3 class="text-xl font-bold" 
+                [class.line-through]="task.completed"
+                [class.text-gray-500]="task.completed"
+                [class.text-gray-800]="!task.completed"
+                [class.dark:text-white]="!task.completed"
+                [class.dark:text-gray-500]="task.completed">
+                {{ task.title }}
+              </h3>
+              <span class="px-3 py-1 rounded-full text-sm font-semibold" [class]="getPriorityColor(task.priority)">
+                {{ getPriorityIcon(task.priority) }} {{ task.priority | titlecase }}
+              </span>
+            </div>
+
+            <!-- Description -->
+            <p *ngIf="task.description" class="text-gray-600 dark:text-gray-400 mb-3" [class.line-through]="task.completed">
+              {{ task.description }}
+            </p>
+
+            <!-- Metadata -->
+            <div class="flex flex-wrap gap-3 text-sm">
+              <!-- Category -->
+              <span *ngIf="task.category" class="flex items-center gap-1 px-3 py-1 rounded-full text-white"
+                [class]="getCategoryColor(task.category)">
+                {{ getCategoryIcon(task.category) }} {{ task.category }}
+              </span>
+
+              <!-- Due Date -->
+              <span *ngIf="task.dueDate" class="flex items-center gap-1 px-3 py-1 rounded-full"
+                [class.bg-red-100]="isOverdue(task)"
+                [class.text-red-700]="isOverdue(task)"
+                [class.bg-blue-100]="!isOverdue(task)"
+                [class.text-blue-700]="!isOverdue(task)">
+                <span>{{ isOverdue(task) ? '⚠️' : '📅' }}</span>
+                {{ formatDate(task.dueDate) }}
+              </span>
+
+              <!-- Tags -->
+              <span *ngFor="let tag of task.tags" class="px-3 py-1 bg-purple-100 text-purple-700 rounded-full">
+                #{{ tag }}
+              </span>
+            </div>
+          </div>
+
+          <!-- Actions -->
+          <div class="shrink-0 flex gap-2">
+            <button (click)="editTask(task)" 
+              class="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+              title="Edit task">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+              </svg>
+            </button>
+            <button (click)="deleteTask(task.id)" 
+              class="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+              title="Delete task">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+

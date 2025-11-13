@@ -2,3 +2,7 @@
 @import "flowbite/src/themes/default";
 @plugin "flowbite/plugin";
 @source "../node_modules/flowbite";
+
+.bg-linear {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
